@@ -1,0 +1,89 @@
+model MVC
+
+enum Button {add, remove, show}
+
+--classes
+
+class Stuff
+attributes
+    stuff:Real
+end
+
+class Model
+attributes
+    modelStuff:Stuff
+operations
+    getStuff()
+        begin
+        end
+    addStuff(stuff:Stuff)
+        begin
+        end
+    removeStuff(stuff:Stuff)
+        begin
+        end
+    update()
+        begin
+        end
+end
+
+class View
+attributes
+    view_model:Model
+    newStuff:Stuff
+operations
+    addToModel(newStuff)
+        begin
+        end
+    removeFromModel(newStuff)
+        begin
+        end
+    showStuff():Stuff
+        begin
+        end
+end
+
+class Controller
+attributes
+    cont_model:Model
+    cont_view:View
+    button:Button
+operations
+    pushButton(button)
+        begin
+            if button=Button::add then
+                cont_view.addToModel(stuff);
+            end;
+            if button=Button::remove then
+                cont_view.removeFromModel(stuff);
+            end;
+            if button=Button::show then
+                showStuff();
+            end;
+        end
+end
+
+--associations
+association controllerView between
+    Controller [1] role controller
+    View [1] role view
+end
+association controllerModel between
+    Controller [1] role controller
+    Model [1] role model
+end
+association modelView between
+    View [1] role view
+    Model [1] role model
+end
+association modelStuff between
+    Model [1] role model
+    Stuff [0..*] role stuff
+end
+--constraints
+constraints
+context Model
+    inv maxStuff:modelStuff <= 10
+    inv minAdd:modelStuff >= 1
+
+
