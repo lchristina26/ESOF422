@@ -1,12 +1,13 @@
 model MVC
 
 enum Button {add, remove, show}
+enum moneyType {euro, dollar, pound}
 
 --classes
 
 class Stuff
 attributes
-    stuff:Real
+    stuff:moneyType
 end
 
 class Model
@@ -20,9 +21,6 @@ operations
         begin
         end
     removeStuff(stuff:Stuff)
-        begin
-        end
-    update()
         begin
         end
 end
