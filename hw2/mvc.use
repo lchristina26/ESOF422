@@ -5,22 +5,39 @@ enum moneyType {euro, dollar, pound}
 
 --classes
 
-class Stuff
+class Money
 attributes
-    stuff:moneyType
+    mType:moneyType
+    amount:Real
 end
 
 class Model
 attributes
-    modelStuff:Stuff
+    modelMoney:Money
 operations
-    getStuff()
+    getMoney()
         begin
         end
-    addStuff(stuff:Stuff)
+    addMoney(amount:Money)
         begin
         end
-    removeStuff(stuff:Stuff)
+    getAmountInDollars():Real
+        declare moneyTotal:Real;
+        moneyTotal:=0;
+        begin
+            for money in monies
+                if money.mType=euro
+                    moneyTotal := moneyTotal+money.amount*1.13;
+                end;
+                if money.mType=dollar
+                    moneyTotal := moneyTotal+money.amount;
+                end;
+                if money.mType=pound
+                    moneyTotal := moneyTotal+money.amount*1.45;
+                end;
+            end;
+        end             
+    removeStuff(amount:Money)
         begin
         end
 end
@@ -28,15 +45,15 @@ end
 class View
 attributes
     view_model:Model
-    newStuff:Stuff
+    newMoney:Money
 operations
-    addToModel(newStuff)
+    addToModel(newMoney)
         begin
         end
-    removeFromModel(newStuff)
+    removeFromModel(newMoney)
         begin
         end
-    showStuff():Stuff
+    showAllMoney()
         begin
         end
 end
@@ -50,13 +67,13 @@ operations
     pushButton(button)
         begin
             if button=Button::add then
-                cont_view.addToModel(stuff);
+                cont_view.addToModel(monies);
             end;
             if button=Button::remove then
-                cont_view.removeFromModel(stuff);
+                cont_view.removeFromModel(monies);
             end;
             if button=Button::show then
-                showStuff();
+                showAllMoney();
             end;
         end
 end
@@ -76,12 +93,14 @@ association modelView between
 end
 association modelStuff between
     Model [1] role model
-    Stuff [0..*] role stuff
+    Money [0..*] role monies
 end
 --constraints
 constraints
 context Model
-    inv maxStuff:modelStuff <= 10
-    inv minAdd:modelStuff >= 1
-
+    inv maxStuff:modelMoney <= 10
+    inv minAdd:modelMoney >= 1
+    inv maxEuro:monies->select(mType = euro)->size < 100
+    inv maxPound:monies->select(mType = pound)->size < 50
+    inv maxDollar:monies->select(mType = dollar)->size < 10
 
