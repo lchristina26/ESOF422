@@ -22,20 +22,21 @@ operations
         begin
         end
     getAmountInDollars():Real
-        declare moneyTotal:Real;
-        moneyTotal:=0;
         begin
-            for money in monies
-                if money.mType=euro
+            declare moneyTotal:Real;
+            moneyTotal:=0;
+            for money in self.monies do
+                if money.mType=moneyType::euro then
                     moneyTotal := moneyTotal+money.amount*1.13;
                 end;
-                if money.mType=dollar
+                if money.mType=moneyType::dollar then
                     moneyTotal := moneyTotal+money.amount;
                 end;
-                if money.mType=pound
+                if money.mType=moneyType::pound then
                     moneyTotal := moneyTotal+money.amount*1.45;
                 end;
             end;
+            result:=moneyTotal;
         end             
     removeStuff(amount:Money)
         begin
@@ -47,10 +48,10 @@ attributes
     view_model:Model
     newMoney:Money
 operations
-    addToModel(newMoney)
+    addToModel(newMoney:Money)
         begin
         end
-    removeFromModel(newMoney)
+    removeFromModel(newMoney:Money)
         begin
         end
     showAllMoney()
@@ -64,17 +65,17 @@ attributes
     cont_view:View
     button:Button
 operations
-    pushButton(button)
+    pushButton()
         begin
-            if button=Button::add then
-                cont_view.addToModel(monies);
-            end;
-            if button=Button::remove then
-                cont_view.removeFromModel(monies);
-            end;
-            if button=Button::show then
-                showAllMoney();
-            end;
+--            if button=Button::add then
+--                cont_view.addToModel(monies);
+--            end;
+--            if button=Button::remove then
+--                cont_view.removeFromModel(monies);
+--            end;
+--            if button=Button::show then
+--                showAllMoney();
+--            end;
         end
 end
 
@@ -84,23 +85,23 @@ association controllerView between
     View [1] role view
 end
 association controllerModel between
-    Controller [1] role controller
-    Model [1] role model
+    Controller [1] role mod_control
+    Model [1] role control_mod
 end
 association modelView between
-    View [1] role view
-    Model [1] role model
+    View [1] role mod_view
+    Model [1] role view_mod
 end
 association modelStuff between
-    Model [1] role model
+    Model [1] role mod_money
     Money [0..*] role monies
 end
 --constraints
 constraints
 context Model
-    inv maxStuff:modelMoney <= 10
-    inv minAdd:modelMoney >= 1
-    inv maxEuro:monies->select(mType = euro)->size < 100
-    inv maxPound:monies->select(mType = pound)->size < 50
-    inv maxDollar:monies->select(mType = dollar)->size < 10
+    inv maxStuff:monies->size <= 10
+    inv minAdd:monies->size >= 1
+    inv maxEuro:monies->select(mType = moneyType::euro)->size < 100
+    inv maxPound:monies->select(mType = moneyType::pound)->size < 50
+    inv maxDollar:monies->select(mType = moneyType::dollar)->size < 10
 
