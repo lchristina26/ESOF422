@@ -1,0 +1,93 @@
+model MVC
+
+class Student
+attributes
+	number:String
+	name:String
+operations
+	getNumber():String
+		begin
+			result:=self.number;
+		end
+	setNumber(Number:String)
+		begin
+			self.number:=Number;
+		end
+	getName():String
+		begin
+			result:=self.name;
+		end
+	setName(Name:String)
+		begin
+			self.name:=Name;
+		end
+end
+
+class StudentView
+attributes
+	printStudentID:String
+	printStudentName:String
+operations
+	showStudentInfo(Name:String,ID:String)
+		begin
+			self.printStudentID:=ID;
+			self.printStudentName:=Name;
+		end
+end
+
+class StudentController
+attributes
+
+	vStudent:StudentView
+	mStudent:Student
+operations
+	init(md:Student, sv:StudentView)
+		begin
+			self.vStudent:=sv;
+			self.mStudent:=md;
+		end
+	setStudentName(Name:String)
+		begin
+			self.mStudent.setName(Name);
+		end
+	getStudentName():String
+		begin
+			result:=self.mStudent.getName();
+		end
+	setStudentNumber(Number:String)
+		begin
+			self.mStudent.setNumber(Number);
+		end
+	getStudentNumber():String
+		begin
+			result:=self.mStudent.getNumber();
+		end
+	updateView()
+		begin
+			declare studentID:String,thisName:String;
+			studentID:=self.getStudentNumber();
+			thisName:=self.getStudentName();
+			self.vStudent.showStudentInfo(thisName,studentID);
+		end
+end
+
+association updates between
+	StudentController[1] role controller
+	StudentView [1] role view
+end
+
+association uses between
+	StudentController[1] role controller
+	Student [0..*] role models
+end
+
+constraints
+context StudentController::getStudentNumber():String
+	pre ctrl1:mStudent.isDefined()
+context StudentController::setStudentNumber(Number:String)
+	pre ctrl2:mStudent.isDefined()
+context StudentController::getStudentName():String
+	pre ctrl3:mStudent.isDefined()
+context StudentController::setStudentName(Name:String)
+	pre ctrl4:mStudent.isDefined()
+
