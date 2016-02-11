@@ -12,20 +12,15 @@ attributes
 end
 
 class Model
-attributes
-    modelMoney:Money
 operations
-    getMoney()
-        begin
-        end
-    addMoney(amount:Money)
+    addMoney(moneyToAdd:Money)
         begin
         end
     getAmountInDollars():Real
         begin
             declare moneyTotal:Real;
             moneyTotal:=0;
-            for money in self.monies do
+            for money in self.mMonies do
                 if money.mType=moneyType::euro then
                     moneyTotal := moneyTotal+money.amount*1.13;
                 end;
@@ -38,24 +33,26 @@ operations
             end;
             result:=moneyTotal;
         end             
-    removeStuff(amount:Money)
-        begin
-        end
 end
 
 class View
 attributes
-    view_model:Model
-    newMoney:Money
+    button:Button
+    totalDollars:Real
+
 operations
-    addToModel(newMoney:Money)
+    pushButton(bType:Button)
         begin
+            self.button := bType;
         end
-    removeFromModel(newMoney:Money)
+    putMoney():Money
         begin
+            result:=self.vMonies;
         end
-    showAllMoney()
+    showTotalInDollars(totalAmount:Real):Real
         begin
+            self.totalDollars := totalAmount;
+            result:=totalAmount;
         end
 end
 
@@ -63,45 +60,53 @@ class Controller
 attributes
     cont_model:Model
     cont_view:View
-    button:Button
 operations
-    pushButton()
+    setModel(mod:Model)
         begin
---            if button=Button::add then
---                cont_view.addToModel(monies);
---            end;
---            if button=Button::remove then
---                cont_view.removeFromModel(monies);
---            end;
---            if button=Button::show then
---                showAllMoney();
---            end;
+            self.cont_model:=mod;
+        end
+    setView(vw:View)
+        begin
+            self.cont_view:=vw;
+        end
+    update()
+        begin
+            if self.view.button=Button::add then
+                declare modelMoney:Money;
+                modelMoney := self.view.putMoney();
+                self.amodel.addMoney(modelMoney);
+            end;
+            if self.view.button=Button::show then
+                declare totalDollars:Real;
+                totalDollars:=self.amodel.getAmountInDollars();
+                self.view.showTotalInDollars(totalDollars);
+            end;
         end
 end
 
 --associations
 association controllerView between
-    Controller [1] role controller
+    Controller [1] role viewController
     View [1] role view
 end
 association controllerModel between
-    Controller [1] role mod_control
-    Model [1] role control_mod
+    Controller [1] role modelController
+    Model [1] role amodel
 end
-association modelView between
-    View [1] role mod_view
-    Model [1] role view_mod
+association storedMoney between
+    Model [1] role modelMoney
+    Money [1..*] role mMonies
 end
-association modelStuff between
-    Model [1] role mod_money
-    Money [0..*] role monies
+association moneyToAdd between
+    View [1] role userMoney
+    Money [1] role vMonies
 end
 --constraints
 constraints
 context Model
-    inv maxStuff:monies->size <= 10
-    inv minAdd:monies->size >= 1
-    inv maxEuro:monies->select(mType = moneyType::euro)->size < 100
-    inv maxPound:monies->select(mType = moneyType::pound)->size < 50
-    inv maxDollar:monies->select(mType = moneyType::dollar)->size < 10
+    inv maxMoney:mMonies->size <= 10
+    inv minMoney:mMonies->size >= 1
+    inv maxEuro:mMonies->select(mType = moneyType::euro)->size < 100.0
+    inv maxPound:mMonies->select(mType = moneyType::pound)->size < 50.0
+    inv maxDollar:mMonies->select(mType = moneyType::dollar)->size < 10.0
 

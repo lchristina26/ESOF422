@@ -1,15 +1,17 @@
-!create model:Model
-!create view:View
-!create ctrl:Controller
-!create money:Money
-!insert (model,money) into modelStuff
-!insert (ctrl,view) into controllerView
-!insert (ctrl,model) into controllerModel
-!insert (view,model) into modelView
-!set ctrl.button:=Button::add
-!set ctrl.cont_model:=model
-!set ctrl.cont_view:=view
-!set view.view_model:=model
-!set money.mType:=moneyType::dollar
-!set money.amount:=10
-!set view.newMoney:=money
+!create m1:Model
+!create v1:View
+!create c1:Controller
+!create mon1:Money
+!create mon2:Money
+!insert (c1,v1) into controllerView
+!insert (c1,m1) into controllerModel
+!c1.setModel(m1)
+!c1.setView(v1)
+!set v1.button:=Button::show
+!set mon1.mType:=moneyType::dollar
+!set mon1.amount:=10
+!set mon2.mType:=moneyType::euro
+!set mon2.amount:=20
+!insert (m1, mon2) into storedMoney
+!insert (m1, mon1) into storedMoney
+!c1.update()
