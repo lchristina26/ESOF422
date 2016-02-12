@@ -14,4 +14,5 @@
 !set mon2.amount:=20
 !insert (m1, mon2) into storedMoney
 !insert (m1, mon1) into storedMoney
-!c1.update()
+!v1.pushButton(v1.button)
+--!c1.update()

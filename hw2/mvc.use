@@ -44,15 +44,15 @@ operations
     pushButton(bType:Button)
         begin
             self.button := bType;
+            self.viewController.update();
         end
     putMoney():Money
         begin
             result:=self.vMonies;
         end
-    showTotalInDollars(totalAmount:Real):Real
+    showTotalInDollars(totalAmount:Real)
         begin
             self.totalDollars := totalAmount;
-            result:=totalAmount;
         end
 end
 
