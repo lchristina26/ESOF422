@@ -1,0 +1,237 @@
+model FPS
+
+enum WeaponType {shotgun, assaultRifle, pistol}
+
+class FPS
+attributes
+    canDefeat:Boolean
+    currHealth:Integer
+    weapon:WeaponType
+    ps : PlayerState
+    neutralState : PlayerState
+    attackState : PlayerState
+    panicState : PlayerState
+    dieState : PlayerState
+
+operations
+    initInstance()
+        begin
+            self.neutralState := new Attack;
+            self.attackState := new Attack;
+            self.panicState := new Panic;
+            self.dieState := new Die;
+            self.ps := self.neutralState;
+        end
+    seeOpponent(canDefeat:Boolean)
+        begin
+            self.ps.seeOpponent(canDefeat);
+        end
+    loseOpponent()
+        begin
+            self.ps.loseOpponent();
+        end
+    receiveBlow(weapon:WeaponType)
+        begin
+            self.ps.receiveBlow(weapon);
+        end
+    statemachines
+        psm StatePattern
+            states
+                startup:initial
+                Neutral  [ps = neutralState]
+                Attack   [ps = attackState]
+                Panic    [ps = panicState]
+                Die      [ps = dieState]
+            transitions
+                startup -> Neutral {create}
+                Neutral -> Attack { [defeat=true and ps = neutralState] seeOpponent() }
+                Neutral -> Panic { [defeat=false and ps = neutralState] seeOpponent() }
+                Attack -> Die { [currHealth=0 and ps = attackState] receiveBlow() }
+                Attack -> Neutral { [ps = attackState] loseOpponent() }
+                Panic -> Die { [currHealth = 0 and ps = panicState] receiveBlow() }
+                Panic -> Neutral { [ps = panicState] loseOpponent() }
+        end
+--        psm Usage
+--            states
+--                startUp:initial
+--                --The initial state after creation
+--                neutral
+--                --See opponent - undefeatable
+--                panic   [not canDefeat]
+--                --See opponent - defeatable
+--                attack  [canDefeat=true]
+--                --No health left
+--                die [currHealth = 0]
+--            transitions
+--                startUp -> neutral  { create }
+--                -- saw defeatable opponent
+--                neutral -> attack   { [canDefeat=true] seeOpponent() }
+--                -- In attack mode, receive blow
+--                attack -> die       { [currHealth = 0] receiveBlow() }
+--                -- saw undefeatable opponent
+--                neutral -> panic    { [not canDefeat] seeOpponent() }
+--                -- In attack mode, lose opponent
+--                attack -> neutral   { loseOpponent() }
+--                -- In panic mode, receive blow
+--                panic -> die        { [currHealth = 0] receiveBlow() }
+--                -- In panic mode, lose opponent
+--                panic -> neutral    { loseOpponent() }
+--    end
+end
+
+abstract class PlayerState
+operations
+    seeOpponent(defeat:Boolean)
+        begin
+        end
+    loseOpponent()
+        begin
+        end
+    receiveBlow(weapon:WeaponType)
+        begin
+        end
+end
+
+class Neutral < PlayerState
+operations
+    seeOpponent(defeat:Boolean)
+        begin
+            if defeat then
+                self.fPS.ps := self.fPS.attackState;
+            end;
+            if not defeat then
+                self.fPS.ps := self.fPS.panicState;
+            end;
+        end
+    loseOpponent()
+        begin
+        end
+    receiveBlow(weapon:WeaponType)
+        begin
+        end
+end 
+
+class Attack < PlayerState
+operations
+    seeOpponent(defeat:Boolean)
+        begin
+        end
+    loseOpponent()
+        begin
+            self.fPS.ps :=  self.fPS.neutralState;
+        end
+    receiveBlow(weapon:WeaponType)
+        begin
+            if weapon = WeaponType::shotgun then
+                self.fPS.currHealth := self.fPS.currHealth - 2;
+            end;
+            if weapon = WeaponType::assaultRifle then
+                self.fPS.currHealth := self.fPS.currHealth - 3;
+            end;
+            if weapon = WeaponType::pistol then
+                self.fPS.currHealth := self.fPS.currHealth - 1;
+            end;
+            if self.fPS.currHealth <= 0 then
+                self.fPS.ps := self.fPS.dieState;
+            end;
+        end
+end 
+
+class Panic < PlayerState
+operations
+    seeOpponent(defeat:Boolean)
+        begin
+        end
+    loseOpponent()
+        begin
+            self.fPS.ps :=  self.fPS.neutralState;
+        end
+    receiveBlow(weapon:WeaponType)
+        begin
+            if weapon = WeaponType::shotgun then
+                self.fPS.currHealth := self.fPS.currHealth - 2;
+            end;
+            if weapon = WeaponType::assaultRifle then
+                self.fPS.currHealth := self.fPS.currHealth - 3;
+            end;
+            if weapon = WeaponType::pistol then
+                self.fPS.currHealth := self.fPS.currHealth - 1;
+            end;
+            if self.fPS.currHealth <= 0 then
+                self.fPS.ps := self.fPS.dieState;
+            end;
+        end
+end 
+
+class Die < PlayerState
+operations
+    seeOpponent(defeat:Boolean)
+        begin
+        end
+    loseOpponent()
+        begin
+        end
+    receiveBlow(weapon:WeaponType)
+        begin
+        end
+end 
+
+
+class Weapon
+attributes
+    wType:WeaponType
+    ammoAmount:Integer
+operations
+    shoot()
+        begin
+          self.ammoAmount := self.ammoAmount - 1;
+        end
+    reload(bullets:Integer)
+        begin
+            self.ammoAmount := self.ammoAmount + bullets;
+        end
+end
+
+class Level
+attributes
+    atLevel:Integer
+operations
+    moveForward()
+        begin
+            self.atLevel := self.atLevel + 1;
+        end
+    moveBackward()
+        begin
+            if self.atLevel > 1 then
+                self.atLevel := self.atLevel - 1;
+            end;        
+        end
+end
+
+
+--associations
+association shooterState between
+    PlayerState [4] role ps
+    FPS [1] role fPS
+end
+--association shooterWeapons between
+--    FPS [1] role shooter
+--    Weapon [0..*] role weapons
+--end
+--association level between
+--    FPS [1] role shooterLevel
+--    Level [1..5] role levels
+--end
+
+
+    
+
+
+
+
+
+
+
+
+
+
