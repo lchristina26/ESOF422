@@ -1,12 +1,12 @@
 model FPS
 
-enum WeaponType {shotgun, assaultRifle, pistol}
+enum WT {sg, ar, pl}
 
 class FPS
 attributes
     canDefeat:Boolean
     currHealth:Integer
-    weapon:WeaponType
+    weapon:WT
     ps : PlayerState
     neutralState : PlayerState
     attackState : PlayerState
@@ -16,67 +16,44 @@ attributes
 operations
     initInstance()
         begin
-            self.neutralState := new Attack;
+            self.weapon := WT::sg;
+            self.currHealth := 1;
+            self.canDefeat := true;
+            self.neutralState := new Neutral;
             self.attackState := new Attack;
             self.panicState := new Panic;
             self.dieState := new Die;
             self.ps := self.neutralState;
         end
-    seeOpponent(canDefeat:Boolean)
+    seeOpponent(defeat:Boolean)
         begin
-            self.ps.seeOpponent(canDefeat);
+            self.ps.seeOpponent(defeat);
         end
     loseOpponent()
         begin
             self.ps.loseOpponent();
         end
-    receiveBlow(weapon:WeaponType)
+    receiveBlow(weapon:WT)
         begin
             self.ps.receiveBlow(weapon);
         end
     statemachines
         psm StatePattern
             states
-                startup:initial
-                Neutral  [ps = neutralState]
-                Attack   [ps = attackState]
-                Panic    [ps = panicState]
-                Die      [ps = dieState]
+                startUp:initial
+                neutral  [ps = neutralState]
+                attack   [ps = attackState]
+                panic    [ps = panicState]
+                die      [ps = dieState]
             transitions
-                startup -> Neutral {create}
-                Neutral -> Attack { [defeat=true and ps = neutralState] seeOpponent() }
-                Neutral -> Panic { [defeat=false and ps = neutralState] seeOpponent() }
-                Attack -> Die { [currHealth=0 and ps = attackState] receiveBlow() }
-                Attack -> Neutral { [ps = attackState] loseOpponent() }
-                Panic -> Die { [currHealth = 0 and ps = panicState] receiveBlow() }
-                Panic -> Neutral { [ps = panicState] loseOpponent() }
+                startUp -> neutral {create}
+                neutral -> attack { [defeat=true and ps = neutralState] seeOpponent() }
+                neutral -> panic { [defeat=false and ps = neutralState] seeOpponent() }
+                attack -> die { [weapon=WT::sg or weapon=WT::ar or weapon=WT::pl and currHealth= 0 and ps = attackState] receiveBlow() }
+                attack -> neutral { [ps = attackState] loseOpponent() }
+                panic -> die { [weapon=WT::sg or weapon=WT::ar or weapon=WT::pl and currHealth= 0 and ps = panicState] receiveBlow() }
+                panic -> neutral { [ps = panicState] loseOpponent() }
         end
---        psm Usage
---            states
---                startUp:initial
---                --The initial state after creation
---                neutral
---                --See opponent - undefeatable
---                panic   [not canDefeat]
---                --See opponent - defeatable
---                attack  [canDefeat=true]
---                --No health left
---                die [currHealth = 0]
---            transitions
---                startUp -> neutral  { create }
---                -- saw defeatable opponent
---                neutral -> attack   { [canDefeat=true] seeOpponent() }
---                -- In attack mode, receive blow
---                attack -> die       { [currHealth = 0] receiveBlow() }
---                -- saw undefeatable opponent
---                neutral -> panic    { [not canDefeat] seeOpponent() }
---                -- In attack mode, lose opponent
---                attack -> neutral   { loseOpponent() }
---                -- In panic mode, receive blow
---                panic -> die        { [currHealth = 0] receiveBlow() }
---                -- In panic mode, lose opponent
---                panic -> neutral    { loseOpponent() }
---    end
 end
 
 abstract class PlayerState
@@ -87,7 +64,7 @@ operations
     loseOpponent()
         begin
         end
-    receiveBlow(weapon:WeaponType)
+    receiveBlow(weapon:WT)
         begin
         end
 end
@@ -106,7 +83,7 @@ operations
     loseOpponent()
         begin
         end
-    receiveBlow(weapon:WeaponType)
+    receiveBlow(weapon:WT)
         begin
         end
 end 
@@ -120,15 +97,15 @@ operations
         begin
             self.fPS.ps :=  self.fPS.neutralState;
         end
-    receiveBlow(weapon:WeaponType)
+    receiveBlow(weapon:WT)
         begin
-            if weapon = WeaponType::shotgun then
+            if weapon = WT::sg then
                 self.fPS.currHealth := self.fPS.currHealth - 2;
             end;
-            if weapon = WeaponType::assaultRifle then
+            if weapon = WT::ar then
                 self.fPS.currHealth := self.fPS.currHealth - 3;
             end;
-            if weapon = WeaponType::pistol then
+            if weapon = WT::pl then
                 self.fPS.currHealth := self.fPS.currHealth - 1;
             end;
             if self.fPS.currHealth <= 0 then
@@ -146,15 +123,15 @@ operations
         begin
             self.fPS.ps :=  self.fPS.neutralState;
         end
-    receiveBlow(weapon:WeaponType)
+    receiveBlow(weapon:WT)
         begin
-            if weapon = WeaponType::shotgun then
+            if weapon = WT::sg then
                 self.fPS.currHealth := self.fPS.currHealth - 2;
             end;
-            if weapon = WeaponType::assaultRifle then
+            if weapon = WT::ar then
                 self.fPS.currHealth := self.fPS.currHealth - 3;
             end;
-            if weapon = WeaponType::pistol then
+            if weapon = WT::pl then
                 self.fPS.currHealth := self.fPS.currHealth - 1;
             end;
             if self.fPS.currHealth <= 0 then
@@ -171,7 +148,7 @@ operations
     loseOpponent()
         begin
         end
-    receiveBlow(weapon:WeaponType)
+    receiveBlow(weapon:WT)
         begin
         end
 end 
@@ -179,7 +156,7 @@ end
 
 class Weapon
 attributes
-    wType:WeaponType
+    wType:WT
     ammoAmount:Integer
 operations
     shoot()
@@ -211,7 +188,7 @@ end
 
 --associations
 association shooterState between
-    PlayerState [4] role ps
+    PlayerState [1] role ps
     FPS [1] role fPS
 end
 --association shooterWeapons between
